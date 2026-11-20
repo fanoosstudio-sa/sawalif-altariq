@@ -304,7 +304,7 @@ const voteOf=r=>r.value?byId(r.value):matchName(r.alts,S.players);
 function summary(){const top=[...S.players].sort((a,b)=>(S.scores[b.id]||0)-(S.scores[a.id]||0))[0];const m=Math.round((Date.now()-S.start)/60000);
   return `نحن في ${S.game||"البرنامج"}، مضى ${m} دقيقة، والمتصدر ${nm(top)} بـ ${S.scores[top.id]||0} نقاط.`}
 async function gate(){if(S.stopped)throw new Stop();while(S.paused){await new Promise(r=>S.resumeW.push(r));if(S.stopped)throw new Stop()}}
-function pause(){if(S.paused)return;S.paused=true;abortIO();$("#onair").classList.add("paused");$("#airTxt").textContent="متوقف مؤقتاً";$("#pauseBtn").textContent="متابعة";setCap("البرنامج متوقف. قولوا «كمّل» أو اضغطوا متابعة.");pausedLoop()}
+function pause(){if(S.paused)return;S.paused=true;abortIO();$("#onair").classList.add("paused");$("#airTxt").textContent="متوقف مؤقتاً";$("#pauseBtn").textContent="متابعة";setCap("البرنامج متوقف. اضغطوا «متابعة» حين تجهزون.");setMic(false,"")}
 function resume(){if(!S.paused)return;S.paused=false;abortIO();$("#onair").classList.remove("paused");$("#airTxt").textContent="على الهواء";$("#pauseBtn").textContent="إيقاف مؤقت";const w=S.resumeW;S.resumeW=[];w.forEach(f=>f())}
 async function pausedLoop(){await sleep(600);while(S.paused&&!S.stopped&&SR){const r=await listen(8000);if(r.aborted)break;if(detectCmd(r.text)==="resume"){resume();break}}setMic(false,"")}
 async function wait(ms){const end=Date.now()+ms;while(Date.now()<end){await gate();await sleep(250)}}
