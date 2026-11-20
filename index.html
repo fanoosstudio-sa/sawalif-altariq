@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#121826">
+<title>سوالف الطريق</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* سوالف الطريق — النسخة الكاملة (18 لعبة). استوديو فانوس */
+:root{--bg:#121826;--card:#1b2335;--line:#2b3652;--ink:#f4efe4;--mute:#9ca7c0;--gold:#f2b544;--red:#e8584c;--green:#4cc38a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Tajawal","Segoe UI",Tahoma,sans-serif;overflow-x:clip}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 120px}
+h1{font-size:40px;line-height:1.05;margin:8px 0 4px;color:var(--gold);font-weight:800}
+h2{font-size:21px;margin:28px 0 10px}
+h3{font-size:16px;margin:14px 0 4px;color:var(--gold)}
+.sub{color:var(--mute);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:14px;color:var(--mute);margin:8px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#10172a;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:56px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;min-height:44px;padding:10px 16px;color:var(--ink);background:var(--line)}
+.btn-gold{background:var(--gold);color:#1b1405;font-weight:800}
+.btn-ghost{background:transparent;border:1px solid var(--line)}
+.btn-red{background:var(--red)}
+.pl-head{display:flex;justify-content:space-between;align-items:center}
+.pl-head b{font-size:18px}
+.x{min-height:36px;padding:4px 12px;background:transparent;color:var(--mute);border:1px solid var(--line)}
+details{margin-top:8px}summary{cursor:pointer;color:var(--gold);font-size:15px;padding:6px 0}
+.note{font-size:14px;color:var(--mute)}
+.warn{background:#3a1f1c;border-color:#6b2e27}
+.ok{color:var(--green)}
+.chk{display:flex;gap:8px;align-items:center;color:var(--ink);margin:8px 0}.chk input{width:auto}
+.start{position:fixed;inset:auto 0 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%)}
+.start button{display:block;width:100%;max-width:608px;margin:0 auto;font-size:24px;min-height:64px;border-radius:18px}
+#reveal{display:none;position:fixed;inset:0;background:var(--bg);z-index:9;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;gap:18px}
+#reveal .big{font-size:30px;font-weight:800;color:var(--gold);line-height:1.3}
+#reveal button{min-width:240px;min-height:60px;font-size:20px}
+#live{display:none;min-height:100vh;flex-direction:column;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.onair{display:flex;align-items:center;gap:10px;font-weight:700}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--red);animation:p 1.6s infinite}
+.paused .dot{background:var(--mute);animation:none}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(232,88,76,.6)}70%{box-shadow:0 0 0 14px rgba(232,88,76,0)}100%{box-shadow:0 0 0 0 rgba(232,88,76,0)}}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+#stage{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:20px 4px}
+#game{color:var(--gold);font-size:18px;font-weight:700;min-height:28px}
+#caption{font-size:clamp(22px,6vw,32px);line-height:1.35;font-weight:700;margin:12px 0;min-height:3em}
+#mic{font-size:16px;color:var(--mute);min-height:26px}
+#mic.on{color:var(--green)}
+#opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;min-height:48px}
+#opts button{background:var(--card);border:1px solid var(--line);font-size:18px}
+#scores{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 14px}
+#scores span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:15px}
+.ctrl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ctrl button{min-height:56px;font-size:17px}
+#pauseBtn{grid-column:1/-1;min-height:72px;font-size:22px;background:var(--gold);color:#1b1405;font-weight:800}
+</style>
+</head>
+<body>
+
+<section id="setup" class="wrap">
+  <h1>سوالف الطريق</h1>
+  <p class="sub">مذيعكم الصوتي للطريق وغرف الانتظار. 18 لعبة. جهّزوا كل شيء قبل الانطلاق.</p>
+  <div id="support" class="card note"></div>
+
+  <h2>المتسابقون</h2>
+  <div id="players"></div>
+  <button id="addP" class="btn-ghost" style="width:100%">+ أضف متسابقاً</button>
+  <p class="note">«المواد الشخصية» اختيارية وسرية: يكتبها كل متسابق بنفسه ثم يمرر الجوال. كل مادة تفتح لعبة: الاعتراف ← الاعترافات، التهمة ← المحكمة، الجملة ← من قالها؟، القصص ← صدّق أو لا تصدّق.</p>
+
+  <h2>الجلسة</h2>
+  <div class="card">
+    <div class="row">
+      <div><label for="dur">مدة الجلسة</label>
+        <select id="dur"><option value="10">10 دقائق</option><option value="20">20 دقيقة</option><option value="30" selected>30 دقيقة</option><option value="45">45 دقيقة</option><option value="60">ساعة</option><option value="90">ساعة ونصف</option><option value="120">ساعتان</option></select></div>
+      <div><label for="mood">الأجواء</label>
+        <select id="mood"><option value="calm">هادئ</option><option value="fun" selected>مرح</option><option value="thrill">مشوّق</option></select></div>
+    </div>
+    <div class="row">
+      <div><label for="rate">سرعة المذيع</label>
+        <select id="rate"><option value="0.85">أبطأ</option><option value="0.95" selected>عادية</option><option value="1.05">أسرع</option></select></div>
+      <div><label for="vol">الصوت</label>
+        <select id="vol"><option value="0.6">منخفض</option><option value="1" selected>عالٍ</option></select></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="secrets"> ألعاب الأسرار (المهمة السرية والجاسوس) — يمرّ الجوال على الجميع قبل البدء</label>
+    <label class="chk"><input type="checkbox" id="saveCrew" checked> احفظ الشلة على هذا الجهاز</label>
+  </div>
+  <button id="testBtn" class="btn-ghost" style="width:100%">جرّب الصوت والميكروفون</button>
+  <p class="note" style="margin-top:18px">© Fanoos Studio — fanoos.studio.sa@gmail.com</p>
+  <div class="start"><button id="go" class="btn-gold">انطلقنا</button></div>
+</section>
+
+<div id="reveal"></div>
+
+<section id="live">
+  <div class="onair" id="onair"><span class="dot"></span><span id="airTxt">على الهواء</span></div>
+  <div id="stage">
+    <div id="game"></div>
+    <div id="caption">…</div>
+    <div id="mic"></div>
+    <div id="opts"></div>
+  </div>
+  <div id="scores"></div>
+  <div class="ctrl">
+    <button id="pauseBtn">إيقاف مؤقت</button>
+    <button id="momentBtn">لحظة</button>
+    <button id="repeatBtn">كرّر</button>
+    <button id="skipBtn">غيّر اللعبة</button>
+    <button id="endBtn" class="btn-red" style="grid-column:1/-1">إنهاء البرنامج</button>
+  </div>
+</section>
+
+<script>
+{
+/* =================== المحتوى =================== */
+const LIKELY=["من أكثر واحد يضيع في الطريق؟","من أكثر واحد يقول خمس دقائق ويتأخر ساعة؟","من أول واحد ينام في السيارة؟","من أكثر واحد يأكل آخر قطعة بدون ما يسأل؟","من أكثر واحد يضحك على نكتته قبل ما يكملها؟","من أكثر واحد ينسى جواله في البيت؟","من أكثر واحد يغني بصوت عالي وهو لحاله؟","من أكثر واحد يقول: أنا ما قلت كذا؟","من أكثر واحد يجوع بعد ربع ساعة من الأكل؟","من أكثر واحد يتحمس لشيء ويتركه بعد يومين؟","من أكثر واحد يعطي رأيه بدون ما أحد يسأله؟","من أكثر واحد يضيّع مفاتيحه؟","من أكثر واحد يتصور سيلفي في كل مكان؟","من أكثر واحد يقول: قلت لكم!؟","من أكثر واحد يصحى متأخر يوم الإجازة؟","من أكثر واحد يحب يفاصل في السوق؟","من أكثر واحد يحكي القصة نفسها كل مرة؟","من أكثر واحد يخاف من الأفلام المرعبة؟","من أكثر واحد يرد على الرسائل بعد يومين؟","من أكثر واحد يقدر يقنع أي أحد بأي شيء؟","من أكثر واحد يطلب نفس الطلب في كل مطعم؟","من أكثر واحد يصير مذيع أخبار لو جرّب؟","من أكثر واحد يعرف أخبار العائلة قبل الكل؟","من أكثر واحد يقول: آخر مرة، والله آخر مرة؟","من أكثر واحد يضحك في المواقف الجادة؟"];
+const BOMB=["فواكه","خضار","أسماء حيوانات","مدن سعودية","دول","ألوان","أكلات شعبية","أشياء في المطبخ","أسماء أولاد","أسماء بنات","أشياء في المدرسة","رياضات","أشياء في البحر","مهن","أدوات في السيارة","حلويات","أشياء لونها أخضر","أشياء نلبسها","أجهزة في البيت","طيور"];
+const PUNISH={
+ senior:["قولي لنا مثلاً شعبياً بصوت مسرحي","احكي لنا ذكرى مضحكة من صغرك بجملتين","امنحي بركتك لواحد من الموجودين وادعي له"],
+ child:["قلّد صوت حيوان تختاره","علّق على هذه اللحظة كأنك مذيع مباراة","قل اسمك بصوت روبوت"],
+ youth:["قل أنا آسف بثلاث نبرات مختلفة","اضحك ضحكة شرير","اقرأ خبراً عاجلاً: البطيخ ارتفع سعره"],
+ adult:["قل أنا آسف بثلاث نبرات مختلفة","اضحك ضحكة شرير","قلّد مذيع النشرة وقل: الطريق مزدحم"]};
+const CASES=["من ترك آخر قطعة في الطبق حتى جفّت؟","من قال خمس دقائق وأنا جاهز ثم تأخر ساعة؟","من يأخذ الشاحن ولا يرجعه؟","من يرفع صوت التلفزيون والكل نايم؟","من يفتح الثلاجة ويطالع فيها خمس دقائق بدون ما ياخذ شي؟","من يقول أنا شبعان ثم ياكل من صحن غيره؟","من يخلّص النت على الكل؟"];
+const PROVERBS=[["العلم في الصغر كالنقش على","الحجر",["حجر"]],["من جدّ","وجد",["وجد"]],["الصديق وقت","الضيق",["ضيق"]],["القرد في عين أمه","غزال",["غزال"]],["اللي ما يعرف الصقر","يشويه",["يشويه","يشوي"]],["عصفور في اليد ولا عشرة على","الشجرة",["شجره"]],["من حفر حفرة لأخيه","وقع فيها",["وقع"]],["الجار قبل","الدار",["دار"]],["على قد لحافك","مد رجليك",["رجليك","رجلك","مد"]],["إذا كان الكلام من فضة فالسكوت من","ذهب",["ذهب"]],["كل إناء بما فيه","ينضح",["ينضح"]],["ما كل ما يتمنى المرء","يدركه",["يدرك"]],["الوقت كالسيف إن لم تقطعه","قطعك",["قطعك","قطعك"]],["رُبّ أخ لك لم","تلده أمك",["تلده","امك"]],["درهم وقاية خير من قنطار","علاج",["علاج"]],["اللي استحوا","ماتوا",["ماتوا"]],["يا غريب كن","أديب",["اديب"]],["الباب اللي يجيك منه الريح","سدّه واستريح",["سده","استريح"]]];
+const TF=[["النعامة تدفن رأسها في الرمل إذا خافت",0],["الأخطبوط له ثلاثة قلوب",1],["العسل لا يفسد حتى لو بقي سنوات طويلة",1],["الجمل يخزن الماء في سنامه",0],["القطط تقضي أكثر من نصف يومها نائمة",1],["سور الصين العظيم يُرى بالعين من القمر",0],["الموز ينمو على شجرة خشبية",0],["الفيل لا يقدر يقفز",1],["الدلافين تنام بنصف دماغها",1],["البطريق يعيش في القطب الشمالي",0],["أسرع حيوان بري هو الفهد",1],["الطماطم من الفواكه علمياً",1],["الذهب يصدأ إذا تركناه في الماء",0],["القمر يضيء بنوره الخاص",0],["الإنسان له عضمة واحدة في الفك السفلي",1],["الزرافة لسانها لونه أزرق غامق",1],["الصقر يرى أبعد من الإنسان بعدة مرات",1],["الحوت الأزرق أكبر حيوان عاش على الأرض",1],["الماء يغلي بسرعة أكبر فوق الجبال العالية",1],["الخفافيش عمياء تماماً",0]];
+const RIDDLES=[["أمشي بلا أرجل وأبكي بلا عيون، فمن أنا؟",["سحاب","سحابه","غيم","غيمه"]],["له أسنان كثيرة لكنه لا يعض، فما هو؟",["مشط"]],["كلما أخذت منه كبر، فما هو؟",["حفره"]],["بيت بلا أبواب ولا نوافذ، فما هو؟",["بيضه","البيض"]],["له عين واحدة ولا يرى، فما هو؟",["ابره","الابره"]],["يمشي بلا رجلين ويقف بلا سبب، فما هو؟",["ساعه"]],["شيء تملكه لكن غيرك يستخدمه أكثر منك، فما هو؟",["اسمك","الاسم","اسم"]],["كلما زاد نقص، فما هو؟",["عمر","العمر"]]];
+const SITUATIONS=[
+ {q:"رجل يسكن في الدور العشرين. ينزل بالمصعد للأرض كل صباح، لكن عند العودة يصعد للدور الثاني عشر ويكمل على الدرج. إلا في الأيام الممطرة، يصعد للعشرين مباشرة. لماذا؟",hints:["المشكلة ليست في المصعد.","المشكلة في الرجل نفسه... في حجمه.","في المطر يحمل شيئاً طويلاً بيده."],keys:["قصير","مظله","شمسيه"],sol:"الرجل قصير ولا يصل إلا لزر الدور الثاني عشر، وفي المطر يضغط زر العشرين بالمظلة."},
+ {q:"رجل دخل مطعماً وطلب كأس ماء. النادل أخرج شيئاً وأخافه فجأة. فشكره الرجل وخرج سعيداً. لماذا؟",hints:["الرجل لم يكن عطشاناً.","كان عنده مشكلة مزعجة تتكرر في صدره.","المشكلة تروح بالخوف المفاجئ."],keys:["فواق","حازوقه","زغطه","شهقه"],sol:"الرجل كان عنده فواق (حازوقة)، والخوف المفاجئ أوقفها."},
+ {q:"رجل أوقف سيارته أمام فندق، فعرف فوراً أنه أفلس. كيف؟",hints:["لم يدخل الفندق.","السيارة والفندق ليسا حقيقيين.","هي لعبة لوحية مشهورة."],keys:["مونوبولي","بنك الحظ","لعبه"],sol:"كان يلعب لعبة بنك الحظ، ووقعت سيارته على فندق غالٍ."},
+ {q:"قرأ رجل كتاباً كاملاً في غرفة مظلمة تماماً بلا أي ضوء. كيف؟",hints:["عيناه لم تستخدما.","الكتاب مختلف عن الكتب العادية.","يقرأ بأصابعه."],keys:["اعمى","كفيف","برايل","اصابعه"],sol:"الرجل كفيف ويقرأ بطريقة برايل."},
+ {q:"أخوان توأم، وُلدا في نفس اليوم ومن نفس الأم، لكن أحدهما يحتفل بعيد ميلاده قبل الآخر بيوم كامل. كيف؟",hints:["الأم ولدت في رحلة.","كانت على متن سفينة.","السفينة عبرت خط التاريخ الدولي."],keys:["خط التاريخ","سفينه","طياره","توقيت","منطقه زمنيه"],sol:"وُلدا على سفينة عبرت خط التاريخ الدولي بين الولادتين."}];
+const CRIMES=[
+ {title:"اختفاء جوهرة العائلة",suspects:["الطباخ","البستاني","الحارس"],clues:["الجوهرة اختفت من غرفة الضيوف وقت العشاء.","البستاني كان في الحديقة طول العشاء، والكل شافه من الشباك.","الحارس كان نايم عند الباب، وسمعه الجميع يشخر.","وجدنا رائحة بهارات قوية على علبة الجوهرة الفارغة."],culprit:0},
+ {title:"لغز الكعكة المسروقة",suspects:["القطة","الجار","الطفل الصغير"],clues:["اختفت كعكة الشوكولاتة من المطبخ.","الجار كان مسافراً هذا الأسبوع.","القطة لا تحب الحلويات أبداً.","على المخدة آثار شوكولاتة صغيرة جداً."],culprit:2},
+ {title:"سرقة مفتاح السيارة",suspects:["الساعي","الضيف","العامل"],clues:["المفتاح كان على الطاولة قرب الباب.","الساعي لم يدخل البيت، سلّم الطرد عند الباب فقط.","العامل كان على السطح يصلح الدش.","الضيف قال إنه ما شاف المفتاح، لكن جيبه يرن مع كل خطوة."],culprit:1}];
+const SOUNDS=[["قلب","نبض",["قلب","نبض"]],["ساعة","ساعه",["ساعه","تكتك"]],["طرق باب","باب",["باب","طرق","دق"]],["مطر","مطر",["مطر","مويه","ماء"]],["فقاعات","فقاعات",["فقاعه","فقاعات","فقاع","ماء"]],["جرس","جرس",["جرس"]],["خطوات","خطوات",["خطوات","خطوه","مشي","رجول"]]];
+const CALLER=["أنت بائع ثلج في القطب الشمالي. أقنعني أشتري منك!","أنت تبيع مظلة في الصحراء وقت الصيف. أقنعني!","أنت مدير مطعم وأنا وجدت في الأكل شعرة. تصرّف!","أنت تبيع سيارة ما لها كفرات. أقنعني إنها أفضل سيارة!","أنت مرشد سياحي في مكان ما فيه شي أبداً. عرّفني على المعالم!","أنت تبيع ساعة ما فيها عقارب. أقنعني!","أنت موظف خدمة عملاء وأنا زبون غاضب لأن البطيخ ما كان أحمر. تصرّف!"];
+const CALLER_REACT=["طيب طيب، بس السعر غالي!","وش الضمان؟ ما أشتري بدون ضمان!","والله كلامك حلو بس ما اقتنعت!","تمام، عطني اثنين!","آه... أفكر فيها وأرد لك!"];
+const FORCED=["بطيخ","طيارة","جدة","قطوة","ملعقة","صاروخ","مظلة","كبسة","ديناصور","مكيف","عصير","شنطة"];
+const MISSION_WORDS=["مظلة","بطيخ","ملح","عصير","جوال","كرسي","قهوة","شمس","طيارة","مفتاح","خبز","قطة"];
+const SPY_PLACES=["المدرسة","المستشفى","الملعب","المطار","البحر","المطعم","السوق","الحديقة","المسجد","البر"];
+const SPY_Q=["وش أكثر شي يعجبك في هذا المكان؟","متى آخر مرة رحت له؟","وش تلبس لو رحت له؟","مع مين تحب تروح له؟","وش الصوت اللي تسمعه هناك؟","كم تقعد فيه عادة؟"];
+const ADVENTURE={
+ start:{t:"وجدتم خريطة قديمة تحت مقعد السيارة. الخريطة تشير إلى وادٍ بعيد، وفيه طريقان: كهف مظلم، أو صوت غريب يأتي من خلف الصخور.",a:["الكهف","كهف","cave"],b:["الصوت","صوت","sound"]},
+ cave:{t:"دخلتم الكهف. الجدران عليها رسومات تلمع. في نهاية الكهف: باب خشبي مقفول، أو نفق ضيق فيه هواء بارد.",a:["الباب","باب","door"],b:["النفق","نفق","tunnel"]},
+ sound:{t:"لحقتم الصوت فوجدتم بئراً قديمة، والصوت يخرج منها! بجانبها حبل، وبجانبها أيضاً صندوق صغير مقفول.",a:["الحبل","حبل","rope"],b:["الصندوق","صندوق","box"]},
+ door:{t:"فتحتم الباب بقوة العائلة، فوجدتم غرفة مليئة بالساعات، كلها واقفة على نفس الوقت... إلا ساعة واحدة تدق! من يلمسها؟",a:["نلمسها","نعم","touch"],b:["نتركها","لا","leave"]},
+ tunnel:{t:"زحفتم في النفق فخرجتم على شاطئ لم يره أحد. على الرمل آثار أقدام تمشي باتجاه البحر... ولا ترجع!",a:["نتبعها","نتبع","follow"],b:["نرجع","رجوع","back"]},
+ rope:{t:"نزلتم بالحبل، فوجدتم في قاع البئر رسالة مكتوبة بخط جدّ قديم: الكنز ليس ذهباً... الكنز عند من يضحك أكثر.",end:1},
+ box:{t:"فتحتم الصندوق، فطار منه طائر أبيض يحمل في رجله مفتاحاً صغيراً، وطار باتجاه الغرب!",end:1},
+ touch:{t:"لمستم الساعة، فتوقفت كل الساعات... وبدأ الوقت يرجع للخلف! وسمعتم صوت المذيع نفسه يضحك من بعيد.",end:1},
+ leave:{t:"تركتم الساعة، فانفتح باب سري تحت الأرض، وظهر درج طويل ينزل إلى ضوء أزرق.",end:1},
+ follow:{t:"تبعتم الآثار حتى وصلتم إلى قارب صغير مكتوب عليه أسماؤكم أنتم!",end:1},
+ back:{t:"رجعتم للنفق، لكن النفق لم يعد موجوداً... مكانه باب جديد عليه رقم سيارتكم!",end:1}};
+const SECRET=["سأخبركم بشيء صغير... أنا لم أكن مذيعاً دائماً.","قبل أن أصير مذيعاً... كنت أعمل في مكان فيه كثير من الأصوات.","المكان الذي كنت فيه... كان فيه ساعة كبيرة لا تتوقف.","الساعة كانت في محطة... محطة قطار قديمة.","في تلك المحطة سمعت قصصاً من آلاف المسافرين.","وكل مسافر ترك عندي حكاية... وأنتم الآن جزء منها.","لكن هناك حكاية واحدة لم أسمع نهايتها بعد...","والحكاية الناقصة... قد تكون حكايتكم أنتم."];
+const TEASE=["تعرفون؟ عندي سر... لكن ليس الآن.","قلت لكم إني أخفي شيئاً؟ انتبهوا للنهاية.","لا تسألوني عن سري... على الأقل ليس قبل آخر الحلقة."];
+const HYPE=["يا سلام!","الله الله!","هذا الكلام!","ممتاز!","أحسنت!"];
+const MOMENT=["خذ راحتك، نرجع لك.","ما في مشكلة، ننتقل للي بعدك.","تم، الدور يرجع لك بعدين."];
+const DEFENSE_REACT=["دفاع مقنع... تقريباً!","المحكمة تسجّل هذا الكلام!","ههه، الجمهور ما اقتنع!","دفاع قوي، لكن الأصوات قالت كلمتها!"];
+const AGES={child:"طفل",youth:"شاب",adult:"كبير",senior:"كبير سن"};
+const YES=["صح","صحيح","ايه","اي","نعم","اكيد","ايوه","صدق","اوكي","مذنب","مذنبه","نجحت","اقتنعت"];
+const NO=["كذب","خطا","غلط","لا","مو صحيح","مو صح","كذبه","بري","بريه","ما نجحت","فشلت","ما اقتنعت"];
+
+/* =================== أدوات =================== */
+const $=s=>document.querySelector(s);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const norm=s=>String(s||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[ً-ْـء]/g,"").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/[^؀-ۿa-z0-9 ]/gi," ").replace(/\s+/g," ").trim().toLowerCase();
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=[...Array(n+1).keys()];for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+const hasAny=(alts,keys)=>(alts||[]).some(a=>{const n=" "+norm(a)+" ";return keys.some(k=>{k=norm(k);if(n.includes(k))return true;return k.length>=4&&n.trim().split(" ").some(t=>lev(t.replace(/^ال/,""),k.replace(/^ال/,""))<=1)})});
+function yesNo(r){if(r.value==="yes")return true;if(r.value==="no")return false;const a=r.alts||[];
+  for(const x of a){const t=" "+norm(x)+" ";if(NO.some(w=>t.includes(" "+norm(w)+" ")))return false;if(YES.some(w=>t.includes(" "+norm(w)+" ")))return true}return null}
+function parseNum(r){if(r.value!==undefined&&!isNaN(+r.value))return +r.value;
+  for(const a of r.alts||[]){const t=norm(a);const d=t.match(/\d+/);if(d)return +d[0];
+    const W=[["دقيقه ونص",90],["دقيقتين",120],["نص دقيقه",30],["ربع دقيقه",15],["دقيقه",60],["خمسه عشر",15],["خمسطعش",15],["خمستعش",15],["عشرين",20],["ثلاثين",30],["اربعين",40],["خمسين",50],["ستين",60],["عشره",10],["عشر",10],["خمسه",5],["خمس",5]];
+    for(const[w,v]of W)if(t.includes(w))return v}
+  return null}
+const KEY="sawalif.v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
+function store(d){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+let DB=load();
+
+/* =================== التجهيز =================== */
+const blank=()=>({id:Math.random().toString(36).slice(2,8),name:"",nick:"",say:"",age:"adult",conf:"",charge:"",quote:"",quoteBy:"",s1:"",s2:"",s3:"",fake:"3"});
+let players=(DB.crew&&DB.crew.length?DB.crew:[{},{}]).map(p=>({...blank(),id:p.id||blank().id,name:p.name||"",nick:p.nick||"",say:p.say||"",age:p.age||"adult"}));
+function renderPlayers(){
+  $("#players").innerHTML=players.map((p,i)=>{const f=(k,ph,tag="input")=>tag==="input"?`<input data-i="${i}" data-k="${k}" value="${esc(p[k])}" placeholder="${ph}">`:`<textarea data-i="${i}" data-k="${k}" placeholder="${ph}">${esc(p[k])}</textarea>`;
+  return `<div class="card">
+   <div class="pl-head"><b>المتسابق ${i+1}</b>${players.length>2?`<button class="x" data-del="${i}">حذف</button>`:""}</div>
+   <div class="row"><div><label>الاسم</label>${f("name","مثلاً: سارة")}</div>
+   <div><label>الفئة</label><select data-i="${i}" data-k="age">${Object.entries(AGES).map(([k,v])=>`<option value="${k}" ${p.age===k?"selected":""}>${v}</option>`).join("")}</select></div></div>
+   <div class="row"><div><label>اللقب (اختياري)</label>${f("nick","يا أمي، يا بطل")}</div><div><label>طريقة النطق (اختياري)</label>${f("say","غَزلان")}</div></div>
+   <details><summary>المواد الشخصية (سرية)</summary>
+    <h3>اعتراف مضحك عن نفسك</h3>${f("conf","مرة نمت في حفلة تخرجي","textarea")}
+    <h3>تهمة خفيفة للمحكمة</h3>${f("charge","من يأخذ الشاحن ولا يرجعه؟")}
+    <h3>جملة مشهورة في العائلة</h3><div class="row">${f("quote","الأكل برد!")}${f("quoteBy","من قالها؟ مثلاً: أبوي")}</div>
+    <h3>ثلاث قصص عنك، واحدة مفبركة</h3>${f("s1","القصة 1")}<div style="height:6px"></div>${f("s2","القصة 2")}<div style="height:6px"></div>${f("s3","القصة 3")}
+    <label>رقم القصة المفبركة</label><select data-i="${i}" data-k="fake"><option ${p.fake==="1"?"selected":""}>1</option><option ${p.fake==="2"?"selected":""}>2</option><option ${p.fake==="3"?"selected":""}>3</option></select>
+   </details></div>`}).join("");
+}
+$("#players").addEventListener("input",e=>{const t=e.target;if(t.dataset.k)players[+t.dataset.i][t.dataset.k]=t.value});
+$("#players").addEventListener("change",e=>{const t=e.target;if(t.dataset.k)players[+t.dataset.i][t.dataset.k]=t.value});
+$("#players").addEventListener("click",e=>{const d=e.target.dataset.del;if(d!==undefined){players.splice(+d,1);renderPlayers()}});
+$("#addP").onclick=()=>{if(players.length>=8)return;players.push(blank());renderPlayers()};
+renderPlayers();
+if(DB.settings)for(const k of["dur","mood","rate","vol"])if(DB.settings[k])$("#"+k).value=DB.settings[k];
+
+/* =================== الصوت =================== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const HAS_TTS="speechSynthesis" in window;
+let arVoice=null;
+function pickVoice(){const v=speechSynthesis.getVoices().filter(v=>/^ar/i.test(v.lang));arVoice=v.find(v=>/SA/i.test(v.lang))||v[0]||null;showSupport()}
+function showSupport(){
+  const ok1=HAS_TTS&&!!arVoice,ok2=!!SR;
+  $("#support").className="card note"+(ok1&&ok2?"":" warn");
+  $("#support").innerHTML=`${ok1?'<span class="ok">✓</span> صوت عربي متوفر':'✗ لا يوجد صوت عربي هنا. ثبّت «Google Text-to-Speech» وأضف العربية، واستخدم Chrome.'}<br>${ok2?'<span class="ok">✓</span> الميكروفون مدعوم':'✗ التعرف على الكلام غير مدعوم هنا (استخدم Chrome). يمكن اللعب بالأزرار.'}`;
+}
+if(HAS_TTS){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}else showSupport();
+
+let AC=null;
+function ac(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}
+function tone(f,d,type="sine",v=.2,delay=0,f2){try{const c=ac(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v*S.vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+function noise(d,v=.4,freq=900,delay=0,type="lowpass",shape=2){try{const c=ac(),b=c.createBuffer(1,Math.max(1,c.sampleRate*d),c.sampleRate),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*Math.pow(1-i/x.length,shape);const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();f.type=type;f.frequency.value=freq;g.gain.value=v*S.vol;s.buffer=b;s.connect(f).connect(g).connect(c.destination);s.start(c.currentTime+delay)}catch(e){}}
+const SFX={
+ beep:()=>{tone(880,.12);return sleep(160)},
+ jingle:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.25,"triangle",.18,i*.14));return sleep(800)},
+ drum:async()=>{for(let i=0;i<10;i++)tone(110+i*6,.07,"triangle",.25,i*.09);await sleep(1000)},
+ boom:()=>{noise(1.1,.7);tone(60,.6,"sine",.5);return sleep(1100)},
+ tick:hi=>tone(hi?1500:1200,.03,"square",.06),
+ gavel:()=>{tone(160,.12,"triangle",.5);tone(160,.12,"triangle",.5,.25);return sleep(500)},
+ win:()=>{[784,988,1175,1568].forEach((f,i)=>tone(f,.3,"triangle",.2,i*.12));return sleep(800)},
+ whistle:()=>{tone(2000,.4,"sine",.25,0,2600);return sleep(450)},
+ bell:n=>{for(let i=0;i<n;i++){tone(660,.6,"sine",.3,i*.7);tone(1320,.4,"sine",.1,i*.7)}return sleep(n*700+300)},
+ mystery:{
+  "قلب":async()=>{for(let i=0;i<5;i++){tone(55,.15,"sine",.6,i*.9);tone(50,.15,"sine",.45,i*.9+.22)}await sleep(4700)},
+  "ساعة":async()=>{for(let i=0;i<8;i++)tone(i%2?1800:1400,.02,"square",.12,i*.5);await sleep(4200)},
+  "طرق باب":async()=>{[0,.3,.6].forEach(d=>{noise(.12,.8,300,d,"lowpass",4);tone(90,.1,"sine",.5,d)});await sleep(1300)},
+  "مطر":async()=>{for(let i=0;i<70;i++)noise(.03,.25,3000+Math.random()*3000,Math.random()*3.5,"highpass",3);noise(3.5,.08,1500,0,"bandpass",0);await sleep(3800)},
+  "فقاعات":async()=>{for(let i=0;i<12;i++)tone(300+Math.random()*300,.08,"sine",.25,i*.25+Math.random()*.1,900+Math.random()*600);await sleep(3300)},
+  "جرس":async()=>{await SFX.bell(3)},
+  "خطوات":async()=>{for(let i=0;i<7;i++)noise(.12,.6,700,i*.5,"bandpass",3);await sleep(3800)}}
+};
+
+/* =================== حالة الجلسة =================== */
+const S={vol:1,rate:.95,paused:false,stopped:false,players:[],scores:{},game:"",start:0,dur:30,mood:"fun",resumeW:[],used:{},confUsed:[],chargeUsed:[],quoteUsed:[],storyUsed:[]};
+class Skip{constructor(stage){this.stage=stage}} class Stop{}
+let curRec=null,manualRes=null;
+function abortIO(){try{HAS_TTS&&speechSynthesis.cancel()}catch(e){}if(curRec){try{curRec.abort()}catch(e){}}if(manualRes){const r=manualRes;manualRes=null;r({aborted:true})}}
+const setCap=t=>$("#caption").textContent=t;
+function setMic(on,txt){const m=$("#mic");m.className=on?"on":"";m.textContent=txt||""}
+function setGame(t){S.game=t;$("#game").textContent=t}
+function renderScores(){$("#scores").innerHTML=S.players.map(p=>`<span>${esc(p.name)}: ${S.scores[p.id]||0}</span>`).join("")}
+function addPts(p,n){S.scores[p.id]=(S.scores[p.id]||0)+n;renderScores()}
+const nm=p=>p.say||p.name;
+const call=p=>p.nick||nm(p);
+const byId=id=>S.players.find(p=>p.id===id);
+const nameOpts=pool=>pool.map(p=>({label:p.name,value:p.id}));
+const YN=[{label:"نعم",value:"yes"},{label:"لا",value:"no"}];
+
+function speakOne(text,rate){return new Promise(res=>{
+  if(!HAS_TTS||!arVoice){setTimeout(res,Math.min(5000,600+text.length*55));return}
+  const u=new SpeechSynthesisUtterance(text);u.lang="ar-SA";u.voice=arVoice;u.rate=rate||S.rate;u.volume=S.vol;
+  let done=false;const fin=()=>{if(!done){done=true;clearTimeout(t);res()}};
+  u.onend=fin;u.onerror=fin;const t=setTimeout(fin,text.length*140+4000);
+  speechSynthesis.speak(u);
+})}
+async function say(text,o={}){
+  if(S.stopped)throw new Stop();
+  setCap(text);setMic(false,"");
+  for(const p of text.split(/(?<=[.!؟?…])\s+/).filter(Boolean)){if(S.paused||S.stopped)break;await speakOne(p,o.rate)}
+  if(S.stopped)throw new Stop();if(S.paused)return"aborted";
+}
+function showOpts(list){$("#opts").innerHTML=list.map((o,i)=>`<button data-o="${i}">${esc(o.label)}</button>`).join("");
+  $("#opts").onclick=e=>{const i=e.target.dataset.o;if(i!==undefined&&manualRes){const r=manualRes;manualRes=null;try{curRec&&curRec.abort()}catch(_){}r({manual:list[+i].value})}}}
+function listen(ms){return new Promise(res=>{
+  let done=false;const fin=v=>{if(done)return;done=true;clearTimeout(to);manualRes=null;curRec=null;res(v)};
+  manualRes=fin;
+  const to=setTimeout(()=>{try{curRec&&curRec.abort()}catch(e){}fin({text:"",alts:[]})},ms);
+  if(!SR){setMic(true,"اختر من الأزرار");return}
+  try{
+    const r=new SR();curRec=r;r.lang="ar-SA";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;
+    r.onresult=e=>{const alts=[...e.results[0]].map(a=>a.transcript);setMic(true,"سمعت: "+alts[0]);fin({text:alts[0],alts})};
+    r.onerror=()=>{};r.onend=()=>{if(!done)setTimeout(()=>{if(!done&&curRec===r){try{r.start()}catch(e){}}},100)};
+    setMic(true,"🎙️ أسمعك…");r.start();
+  }catch(e){setMic(true,"اختر من الأزرار")}
+})}
+const CMDS=[["pause",["وقف","اوقف","توقف","ستوب"]],["resume",["كمل","استمر","كملي","يلا كمل"]],["moment",["لحظه","دقيقه","انتظر","استنى"]],["repeat",["كرر","عيد","اعد","ما سمعت"]],["where",["وين وصلنا","وين وقفنا"]],["skip",["غير اللعبه","غيرها","لعبه ثانيه"]],["lighter",["لعبه اخف","شي اخف"]],["hotter",["لعبه احمس","شي احمس"]],["louder",["ارفع الصوت","علي الصوت"]],["quieter",["هدي الصوت","وطي الصوت","نزل الصوت"]],["end",["انهي البرنامج","خلصنا البرنامج"]]];
+function detectCmd(t){const n=norm(t);if(!n||n.split(" ").length>3)return null;for(const[c,ws]of CMDS)if(ws.some(w=>n===norm(w)||n==="يا مذيع "+norm(w)))return c;return null}
+function matchName(alts,pool){
+  for(const a of alts||[]){const n=norm(a);const toks=n.split(" ").map(t=>t.replace(/^(يا|ال)/,""));
+    for(const p of pool){const cands=[p.name,p.nick,p.say].map(norm).filter(c=>c.length>=2).map(c=>c.replace(/^يا /,""));
+      for(const c of cands){if((" "+n+" ").includes(" "+c+" ")||n.includes(c)&&c.length>=3)return p;const cc=c.replace(/^ال/,"");if(cc.length>=4&&toks.some(t=>lev(t,cc)<=1))return p}}}
+  return null}
+const voteOf=r=>r.value?byId(r.value):matchName(r.alts,S.players);
+function summary(){const top=[...S.players].sort((a,b)=>(S.scores[b.id]||0)-(S.scores[a.id]||0))[0];const m=Math.round((Date.now()-S.start)/60000);
+  return `نحن في ${S.game||"البرنامج"}، مضى ${m} دقيقة، والمتصدر ${nm(top)} بـ ${S.scores[top.id]||0} نقاط.`}
+async function gate(){if(S.stopped)throw new Stop();while(S.paused){await new Promise(r=>S.resumeW.push(r));if(S.stopped)throw new Stop()}}
+function pause(){if(S.paused)return;S.paused=true;abortIO();$("#onair").classList.add("paused");$("#airTxt").textContent="متوقف مؤقتاً";$("#pauseBtn").textContent="متابعة";setCap("البرنامج متوقف. قولوا «كمّل» أو اضغطوا متابعة.");pausedLoop()}
+function resume(){if(!S.paused)return;S.paused=false;abortIO();$("#onair").classList.remove("paused");$("#airTxt").textContent="على الهواء";$("#pauseBtn").textContent="إيقاف مؤقت";const w=S.resumeW;S.resumeW=[];w.forEach(f=>f())}
+async function pausedLoop(){await sleep(600);while(S.paused&&!S.stopped&&SR){const r=await listen(8000);if(r.aborted)break;if(detectCmd(r.text)==="resume"){resume();break}}setMic(false,"")}
+async function wait(ms){const end=Date.now()+ms;while(Date.now()<end){await gate();await sleep(250)}}
+
+async function ask(prompt,{to=null,options=[],timeout=null,hints=[]}={}){
+  const tmo=timeout||(to&&to.age==="senior"?10000:7000);const rate=to&&to.age==="senior"?Math.min(S.rate,.85):S.rate;
+  let line=prompt,h=0;
+  for(;;){
+    await gate();
+    if(line&&await say(line,{rate})==="aborted"){line=prompt;continue}
+    line=null;await gate();
+    showOpts(options);await SFX.beep();
+    const r=await listen(tmo);showOpts([]);
+    if(r.aborted){line=prompt;continue}
+    if(r.manual!==undefined)return{value:r.manual,alts:[]};
+    const c=detectCmd(r.text);
+    if(c){
+      if(c==="pause"){pause();line=prompt;continue}
+      if(c==="resume"||c==="repeat"){line=prompt;continue}
+      if(c==="moment"){await say(pick(MOMENT));return{moment:true}}
+      if(c==="where"){await say(summary());line=prompt;continue}
+      if(c==="skip")throw new Skip();
+      if(c==="lighter")throw new Skip("calm");
+      if(c==="hotter")throw new Skip("peak");
+      if(c==="end")throw new Stop();
+      if(c==="louder"||c==="quieter"){S.vol=c==="louder"?1:.6;await say("تم.");line=prompt;continue}
+    }
+    if(!r.text){if(h<hints.length){line=hints[h++];continue}return{silent:true,alts:[]}}
+    return{text:r.text,alts:r.alts};
+  }
+}
+async function voteAll(prompt,pool=S.players,voters=S.players){const v={};
+  for(const p of shuffle(voters)){const r=await ask(prompt(p),{to:p,options:nameOpts(pool),hints:["قل اسماً واحداً."]});if(r.moment||r.silent)continue;const w=r.value?byId(r.value):matchName(r.alts,pool);if(w)v[w.id]=(v[w.id]||0)+1}
+  return Object.entries(v).sort((a,b)=>b[1]-a[1])}
+async function punish(p){const pun=pick(PUNISH[p.age]||PUNISH.adult);await ask(`العقوبة يا ${call(p)}: ${pun}. تفضّل!`,{to:p,timeout:15000,options:[{label:"نُفّذت",value:"done"}]});await say(pick(["ههههه، عقوبة مستحقة!","تصفيق حار!","الله يعينك! نكمل."]))}
+
+/* =================== الألعاب =================== */
+const G={};
+// 1 من الأرجح
+G.likely={name:"من الأرجح؟",stage:"open",ok:()=>true,run:async()=>{
+  await say("لعبة: من الأرجح؟ أسأل سؤالاً، وكل واحد يقول اسم الشخص اللي يشوفه أرجح.");
+  S.usedQ=S.usedQ||[];
+  for(const q of shuffle(LIKELY.filter(q=>!S.usedQ.includes(q))).slice(0,2)){
+    S.usedQ.push(q);await SFX.drum();await say(q);
+    const v=await voteAll(p=>`${call(p)}، من تختار؟`);
+    if(!v.length){await say("ولا صوت! الكل خايف يتهم أحد.");continue}
+    if(v[1]&&v[1][1]===v[0][1]){await say(`تعادل بين ${nm(byId(v[0][0]))} و ${nm(byId(v[1][0]))}! القضية معلّقة.`);continue}
+    const acc=byId(v[0][0]);DB.acc=DB.acc||{};const times=(DB.acc[acc.id]=(DB.acc[acc.id]||0)+1);
+    await SFX.drum();await say(`والنتيجة... ${v[0][1]} ${v[0][1]===1?"صوت":"أصوات"} لـ ${nm(acc)}!${times>2?" وهذه ليست أول مرة!":""}`);
+    const d=await ask(`${call(acc)}، عندك عشر ثواني للدفاع عن نفسك!`,{to:acc,timeout:12000,options:[{label:"انتهى الدفاع",value:"done"}]});
+    await say(d.text||d.value?pick(DEFENSE_REACT):"الصمت اعتراف! نكمل.");
+  }}};
+// 2 القنبلة
+G.bomb={name:"القنبلة",stage:"rise",ok:()=>true,run:async()=>{
+  const cat=pick(BOMB);
+  await say(`لعبة القنبلة! الفئة: ${cat}. كل واحد يقول كلمة بسرعة، والقنبلة تنتقل للي بعده. المكرر ما ينحسب، ومن تنفجر عنده له عقوبة!`);
+  await say("القنبلة تبدأ... الآن!");
+  let left=(22+Math.random()*25)*1000,i=Math.floor(Math.random()*S.players.length),last=Date.now(),tk=0;const used=new Set();
+  const tick=setInterval(()=>{if(S.paused)return;tk++;const fast=left-(Date.now()-last)<8000;if(fast||tk%2===0)SFX.tick(fast)},250);
+  try{for(;;){
+    const p=S.players[i%S.players.length];last=Date.now();
+    const r=await ask(`${nm(p)}!`,{to:p,timeout:Math.min(7000,Math.max(1500,left)),options:[{label:"قال كلمة",value:"ok"}]});
+    left-=Date.now()-last;
+    if(left<=0){clearInterval(tick);await SFX.boom();await say(`بووم! انفجرت عند ${nm(p)}!`);S.players.forEach(o=>{if(o!==p)addPts(o,1)});await punish(p);return}
+    if(r.moment||r.value==="ok"){i++;continue}
+    if(r.text){const w=norm(r.text).split(" ").slice(-1)[0];if(used.has(w)){await say("مكررة!");continue}used.add(w);i++}
+  }}finally{clearInterval(tick)}}};
+// 3 الاعترافات
+G.confess={name:"الاعترافات المجهولة",stage:"rise",ok:()=>S.players.some(p=>p.conf&&!S.confUsed.includes(p.id)),run:async()=>{
+  await say("الاعترافات المجهولة! أقرأ اعترافاً، وأنتم تخمّنون صاحبه. التخمين الصحيح بنقطة، وصاحب الاعتراف يكسب نقطة على كل واحد خدعه.");
+  for(const owner of shuffle(S.players.filter(p=>p.conf&&!S.confUsed.includes(p.id))).slice(0,2)){
+    S.confUsed.push(owner.id);await SFX.drum();await say(`اعتراف خطير... يقول صاحبه: ${owner.conf}`);
+    let fooled=0;
+    for(const p of shuffle(S.players)){const r=await ask(`${call(p)}، من صاحب هذا الاعتراف؟`,{to:p,options:nameOpts(S.players)});if(r.moment||r.silent||p===owner)continue;if(voteOf(r)===owner)addPts(p,1);else fooled++}
+    if(fooled)addPts(owner,fooled);
+    await say("وصاحب الاعتراف هو...");await SFX.drum();await say(`${nm(owner)}!${fooled>1?` وخدع ${fooled} منكم!`:""} ${pick(HYPE)}`);
+  }}};
+// 4 المحكمة العائلية
+G.court={name:"المحكمة العائلية",stage:"peak",ok:()=>S.players.length>=3,run:async()=>{
+  const own=S.players.filter(p=>p.charge&&!S.chargeUsed.includes(p.id));
+  const cases=[...shuffle(own).slice(0,2).map(p=>{S.chargeUsed.push(p.id);return p.charge}),...shuffle(CASES)].slice(0,2);
+  for(const c of cases){
+    await SFX.gavel();await say("محكمة، محكمة! الجلسة منعقدة! القضية: "+c+" التصويت بعد العد.");
+    await say("ثلاثة... اثنان... واحد!");
+    const v=await voteAll(p=>`${call(p)}، من المتهم؟`);
+    if(!v.length){await say("لا متهم؟ القضية تُحفظ ضد مجهول!");continue}
+    if(v[1]&&v[1][1]===v[0][1]){await SFX.gavel();await say("تساوت الأصوات! القاضي في مزاج رائق: عفو عام! لكن لا تكرروها!");continue}
+    const acc=byId(v[0][0]);const pros=pick(S.players.filter(p=>p!==acc));
+    await say(`${v[0][1]} ${v[0][1]===1?"صوت":"أصوات"} ضد ${nm(acc)}!`);
+    await ask(`المتهم ${call(acc)}، أمامك خمس عشرة ثانية للدفاع، والعالم يستمع!`,{to:acc,timeout:16000,options:[{label:"انتهى الدفاع",value:"done"}]});
+    await ask(`يا مدّعي، ${call(pros)}، خمس عشرة ثانية للمرافعة. ابدأ!`,{to:pros,timeout:16000,options:[{label:"انتهت المرافعة",value:"done"}]});
+    let g=0,n=0;
+    for(const p of S.players.filter(p=>p!==acc)){const r=await ask(`${call(p)}، مذنب أم بريء؟`,{to:p,options:[{label:"مذنب",value:"yes"},{label:"بريء",value:"no"}]});const y=yesNo(r);if(y===true)g++;else if(y===false)n++}
+    await SFX.gavel();
+    if(g>n){await say(`الحكم: مذنب بأغلبية ${g}!`);addPts(pros,1);await punish(acc)}
+    else{await say(g===n?"تساوت الأصوات! براءة لعدم كفاية الأدلة!":"الحكم: بريء! يخرج المتهم مرفوع الرأس!");addPts(acc,1)}
+  }
+  await SFX.gavel();await say("القضية الكبرى! المتهم... المذيع نفسه! التهمة: إخفاء سر عن العائلة.");
+  let g=0;for(const p of shuffle(S.players).slice(0,3)){const r=await ask(`${call(p)}، مذنب أم بريء؟`,{to:p,options:[{label:"مذنب",value:"yes"},{label:"بريء",value:"no"}]});if(yesNo(r))g++}
+  await say(g>=2?"مذنب؟! حسناً... أعترف أن عندي سراً. لكن الدفاع يطلب تأجيل الكشف لآخر الحلقة! والعقوبة: سأغني.":"بريء! شكراً لثقتكم... مع أن عندي سراً فعلاً. وللاحتفال سأغني.");
+  await SFX.win();await say("لا لا لاااا... انتهت الأغنية. رُفعت الجلسة!");
+}};
+// 5 من قالها؟
+G.quote={name:"من قالها؟",stage:"rise",ok:()=>S.players.some(p=>p.quote&&p.quoteBy&&!S.quoteUsed.includes(p.id)),run:async()=>{
+  await say("لعبة: من قالها؟ أقرأ جملة مشهورة في العائلة، وأنتم تخمّنون من قائلها.");
+  const all=S.players.filter(p=>p.quote&&p.quoteBy);const bys=[...new Set(all.map(p=>p.quoteBy.trim()))];
+  for(const w of shuffle(all.filter(p=>!S.quoteUsed.includes(p.id))).slice(0,2)){
+    S.quoteUsed.push(w.id);await SFX.drum();await say(`الجملة: «${w.quote}»`);
+    for(const p of shuffle(S.players)){if(p===w)continue;const r=await ask(`${call(p)}، من قالها؟`,{to:p,options:bys.map(b=>({label:b,value:b}))});if(r.moment||r.silent)continue;
+      const ok=r.value?norm(r.value)===norm(w.quoteBy):hasAny(r.alts,[w.quoteBy]);if(ok){addPts(p,1);await say(pick(HYPE))}}
+    await say(`والقائل هو... ${w.quoteBy}!`);
+  }}};
+// 6 المزاد الجريء
+G.auction={name:"المزاد الجريء",stage:"peak",ok:()=>true,run:async()=>{
+  const topic=pick(["الملعقة","الكرسي","المخدة","الشماغ","البطيخ","إشارة المرور","الشاحن","الكيس البلاستيك"]);
+  await say(`المزاد الجريء! الموضوع: ${topic}. كل واحد يزايد: كم ثانية تقدر تتكلم عنه بدون توقف؟`);
+  let best=null,bid=0;
+  for(const p of shuffle(S.players)){const r=await ask(`${call(p)}، كم ثانية؟`,{to:p,options:[10,20,30,45,60].map(n=>({label:n+" ث",value:n}))});const n=parseNum(r);if(n&&n>bid){bid=Math.min(n,90);best=p;await say(`${bid} ثانية من ${nm(p)}!`)}}
+  if(!best){await say("ولا مزايدة؟ المزاد يُلغى!");return}
+  await say(`رسى المزاد على ${nm(best)} بـ ${bid} ثانية! الوقت يبدأ... الآن!`);await SFX.whistle();
+  setCap(`${best.name} يتكلم عن ${topic}… ${bid} ثانية`);await wait(bid*1000);await SFX.whistle();
+  const judge=pick(S.players.filter(p=>p!==best));
+  const r=await ask(`انتهى الوقت! ${call(judge)}، أنت الحكم: هل تكلم بدون توقف ولا تكرار؟`,{to:judge,options:YN});
+  if(yesNo(r)){addPts(best,Math.max(1,Math.round(bid/15)));await say(`نجح! ${nm(best)} يكسب ${Math.max(1,Math.round(bid/15))} نقاط!`)}
+  else{S.players.forEach(o=>{if(o!==best)addPts(o,1)});await say("سقط في المزاد! نقطة لكل الباقين.")}}};
+// 7 صح أو كذب
+G.tf={name:"صح أو كذب",stage:"calm",ok:()=>true,run:async()=>{
+  await say("صح أو كذب! جملة سريعة، وتقولون: صح، أو كذب.");S.tfUsed=S.tfUsed||[];
+  for(const p of shuffle(S.players)){
+    const q=shuffle(TF.filter(x=>!S.tfUsed.includes(x[0])))[0]||pick(TF);S.tfUsed.push(q[0]);
+    const r=await ask(`${call(p)}: ${q[0]}. صح أو كذب؟`,{to:p,options:[{label:"صح",value:"yes"},{label:"كذب",value:"no"}]});
+    if(r.moment||r.silent){await say(`الجواب: ${q[1]?"صح":"كذب"}.`);continue}
+    const y=yesNo(r);if(y===null){await say(`ما فهمت، والجواب: ${q[1]?"صح":"كذب"}.`);continue}
+    if(y===!!q[1]){addPts(p,1);await say(pick(HYPE))}else await say(`لا! الجواب: ${q[1]?"صح":"كذب"}.`);
+  }}};
+// 8 كمّل المثل
+G.proverb={name:"كمّل المثل",stage:"rise",ok:()=>true,run:async()=>{
+  await say("كمّل المثل! أبدأ المثل، وأنت تكمله.");S.prUsed=S.prUsed||[];
+  const ordered=[...S.players].sort((a,b)=>(b.age==="senior")-(a.age==="senior"));
+  for(const p of ordered){
+    const q=shuffle(PROVERBS.filter(x=>!S.prUsed.includes(x[0])))[0]||pick(PROVERBS);S.prUsed.push(q[0]);
+    const r=await ask(`${call(p)}: ${q[0]}...`,{to:p,hints:[`أول حرف: ${q[1][0]}...`],options:[{label:"عرفها",value:"yes"},{label:"ما عرفها",value:"no"}]});
+    const ok=r.value?r.value==="yes":hasAny(r.alts,q[2]);
+    if(ok){addPts(p,1);await say(`${pick(HYPE)} ${q[0]} ${q[1]}.`)}else await say(`${q[0]}... ${q[1]}!`);
+  }}};
+// 9 مغامرتنا المسموعة
+G.adventure={name:"مغامرتنا المسموعة",stage:"rise",ok:()=>true,run:async()=>{
+  let node=DB.adv&&ADVENTURE[DB.adv]&&!ADVENTURE[DB.adv].end?DB.adv:"start";
+  await say(node==="start"?"مغامرتنا المسموعة! قصة أبطالها أنتم، وقراراتكم تغيّر الأحداث.":"نكمل مغامرتنا من حيث توقفنا...");
+  for(;;){const s=ADVENTURE[node];await SFX.drum();await say(s.t);DB.adv=node;store(DB);
+    if(s.end){await say("ويتوقف المشهد هنا... وتكملة المغامرة في رحلة قادمة!");DB.adv="start";store(DB);return}
+    let a=0,b=0;
+    for(const p of shuffle(S.players)){const r=await ask(`${call(p)}: ${s.a[0]} أم ${s.b[0]}؟`,{to:p,options:[{label:s.a[0],value:"a"},{label:s.b[0],value:"b"}]});
+      if(r.value==="a"||hasAny(r.alts,s.a.slice(0,2)))a++;else if(r.value==="b"||hasAny(r.alts,s.b.slice(0,2)))b++}
+    const ch=a===b?pick(["a","b"]):a>b?"a":"b";await say(`القرار: ${s[ch][0]}!`);node=s[ch][2];
+  }}};
+// 10 جريمة في السيارة
+G.crime={name:"جريمة في السيارة",stage:"long",ok:()=>true,run:async()=>{
+  S.crUsed=S.crUsed||[];const c=shuffle(CRIMES.filter(x=>!S.crUsed.includes(x.title)))[0]||pick(CRIMES);S.crUsed.push(c.title);
+  await SFX.drum();await say(`جريمة في السيارة: ${c.title}! المشتبه بهم ثلاثة: ${c.suspects.join("، و")}. اسمعوا الأدلة جيداً.`);
+  for(let i=0;i<c.clues.length;i++){await SFX.tick(true);await say(`الدليل ${["الأول","الثاني","الثالث","الرابع"][i]}: ${c.clues[i]}`);await wait(1200)}
+  let right=0;
+  for(const p of shuffle(S.players)){const r=await ask(`${call(p)}، من الفاعل؟`,{to:p,options:c.suspects.map((s,i)=>({label:s,value:i}))});
+    const k=r.value!==undefined?+r.value:c.suspects.findIndex(s=>hasAny(r.alts,[s]));if(k===c.culprit){addPts(p,2);right++}}
+  await say("والفاعل هو...");await SFX.drum();await say(`${c.suspects[c.culprit]}! ${right?`${right} منكم حلّوا القضية، ولكل واحد نقطتان.`:"القضية لم تُغلق في عقولكم... لكنها أُغلقت في ملفاتي!"}`);}};
+// 11 غرفة الهروب
+G.escape={name:"قصر الساعة المسحورة",stage:"long",ok:()=>true,run:async()=>{
+  const words=[];let clock=6*60*1000;const t0=Date.now();const rem=()=>clock-(Date.now()-t0);
+  await SFX.jingle();await say("كان يا ما كان... وفجأة يُغلق الباب خلفكم، وتجدون أنفسكم في قصر الساعة المسحورة! الباب يُفتح بتعويذة من أربع كلمات، كل كلمة من لغز. وأمامكم ست دقائق قبل أن ينهار السقف!");
+  const order=shuffle(S.players);const pr=pick(PROVERBS),rd=pick(RIDDLES),g1=1+Math.floor(Math.random()*4),g2=1+Math.floor(Math.random()*3),g3=1+Math.floor(Math.random()*4),rev=pick(["مفتاح","باب","كنز","قمر","نجمة"]);
+  const puzzles=[
+   {intro:"على الباب نقش قديم يقول:",q:`${pr[0]}...`,keys:pr[2],word:pr[1].split(" ")[0],hint:`أول حرف: ${pr[1][0]}`},
+   {intro:"صوت غريب يسأل:",q:rd[0],keys:rd[1],word:rd[1][0],hint:`أول حرف: ${rd[1][0][0]}`},
+   {intro:"دقّ الجرس... عدّوا الدقات!",bells:[g1,g2,g3],q:"كم دقة سمعتم بالمجموع؟",num:g1+g2+g3,word:String(g1+g2+g3),hint:"اجمعوا الدقات الثلاث."},
+   {intro:"الصندوق الأخير مكتوب عليه كلمة بالمقلوب. اسمعوا الحروف من الآخر:",q:[...rev].reverse().join("... ")+". ما الكلمة؟",keys:[rev],word:rev,hint:`أول حرف في الكلمة: ${rev[0]}`}];
+  for(let k=0;k<puzzles.length;k++){
+    if(rem()<=0)break;const z=puzzles[k],p=order[k%order.length];
+    if(k===2&&rem()>60000){await say("انتبهوا! الساعة تتسارع... فقدتم دقيقة!");clock-=60000}
+    await say(z.intro);if(z.bells){for(const n of z.bells){await SFX.bell(n);await sleep(500)}}
+    let solved=false;
+    for(let tr=0;tr<2&&!solved&&rem()>0;tr++){
+      const r=await ask(`${call(p)}${tr?"، أو أي واحد يساعد":""}: ${z.q}`,{to:p,options:[{label:"حلّوه",value:"yes"},{label:"ما حلّوه",value:"no"}]});
+      solved=r.value?r.value==="yes":z.num?parseNum(r)===z.num:hasAny(r.alts,z.keys);
+      if(!solved&&tr===0){clock-=20000;await say(`تلميح، ويخصم عشرين ثانية: ${z.hint}`)}
+    }
+    if(solved){words.push(z.word);await say(`صحيح! الكلمة: ${z.word}. باقي ${Math.max(0,Math.round(rem()/60000))} دقائق تقريباً.`)}
+    else{words.push(z.word);clock-=40000;await say(`الجواب: ${z.word}. خسرتم من الوقت، لكن الكلمة معكم.`)}
+  }
+  if(rem()<=0){await SFX.boom();await say("انهار السقف... لكن في اللحظة الأخيرة ظهر باب صغير خلف المقعد! مخرج أم فخ؟ نعرف في رحلة قادمة.");return}
+  const r=await ask(`آخر خطوة! قولوا الكلمات الأربع بنفس ترتيب حلّها.`,{timeout:12000,options:[{label:words.join("، "),value:"yes"},{label:shuffle(words).join("، "),value:"no"}]});
+  const ok=r.value?r.value==="yes":(()=>{const t=norm((r.alts||[])[0]||"");let pos=-1;return words.every(w=>{const i=t.indexOf(norm(w),pos+1);if(i<0)return false;pos=i;return true})})();
+  if(ok){await SFX.win();await say("انفتح الباب! خرجتم والحجارة تتساقط خلفكم! نقطتان للجميع. لكن ما هذا الصندوق الذي سقط من السقف؟");S.players.forEach(p=>addPts(p,2))}
+  else{await say(`الترتيب الصحيح: ${words.join("، ")}. انفتح الباب نصف فتحة... وهربتم بأعجوبة! نقطة للجميع.`);S.players.forEach(p=>addPts(p,1))}}};
+// 12 لغز الموقف
+G.situation={name:"لغز الموقف",stage:"calm",ok:()=>true,run:async()=>{
+  S.stUsed=S.stUsed||[];const s=shuffle(SITUATIONS.filter(x=>!S.stUsed.includes(x.q)))[0]||pick(SITUATIONS);S.stUsed.push(s.q);
+  await say("لغز الموقف! اسمعوا القصة، وفكّروا: لماذا؟");await say(s.q);
+  for(let h=0;h<=s.hints.length;h++){
+    for(const p of shuffle(S.players)){const r=await ask(`${call(p)}، وش تتوقع السبب؟`,{to:p,timeout:9000,options:[{label:"حلّها",value:"yes"},{label:"ما حلّها",value:"no"}]});
+      if(r.value==="yes"||hasAny(r.alts,s.keys)){addPts(p,h<2?2:1);await say(`${pick(HYPE)} ${nm(p)} حلّها! ${s.sol}`);return}}
+    if(h<s.hints.length)await say(`دافئ... لكن ليس بعد. تلميح: ${s.hints[h]}`);
+  }
+  await say(`ما أحد حلّها! الحل: ${s.sol}`)}};
+// 13 صدّق أو لا تصدّق
+G.believe={name:"صدّق أو لا تصدّق",stage:"calm",ok:()=>S.players.some(p=>p.s1&&p.s2&&p.s3&&!S.storyUsed.includes(p.id)),run:async()=>{
+  await say("صدّق أو لا تصدّق! أقرأ ثلاث قصص عن واحد منكم: اثنتان صحيحتان، وواحدة مفبركة. اكتشفوا المفبركة!");
+  for(const o of shuffle(S.players.filter(p=>p.s1&&p.s2&&p.s3&&!S.storyUsed.includes(p.id))).slice(0,1)){
+    S.storyUsed.push(o.id);await say(`القصص عن ${nm(o)}. واحد: ${o.s1}. اثنان: ${o.s2}. ثلاثة: ${o.s3}.`);let fooled=0;
+    for(const p of shuffle(S.players.filter(x=>x!==o))){const r=await ask(`${call(p)}، أي رقم المفبركة؟`,{to:p,options:["1","2","3"].map(n=>({label:n,value:n}))});
+      let n=r.value||parseNum(r);if(!n){const t=norm((r.alts||[])[0]||"");n=/واحد|اول/.test(t)?1:/اثنين|ثنين|ثاني/.test(t)?2:/ثلاث|ثالث/.test(t)?3:null}
+      if(String(n)===String(o.fake))addPts(p,1);else fooled++}
+    if(fooled)addPts(o,fooled);await SFX.drum();await say(`المفبركة هي رقم ${o.fake}! ${fooled?`و${nm(o)} خدع ${fooled} منكم!`:"ما قدر يخدع أحد!"}`);
+  }}};
+// 14 الصوت المجهول
+G.sound={name:"الصوت المجهول",stage:"calm",ok:()=>true,run:async()=>{
+  await say("الصوت المجهول! اسمعوا جيداً، وخمّنوا مصدر الصوت.");
+  for(const p of shuffle(S.players).slice(0,Math.min(4,S.players.length))){
+    const s=pick(SOUNDS);const opts=shuffle([s,...shuffle(SOUNDS.filter(x=>x!==s)).slice(0,2)]);
+    await say(`${call(p)}، هذا صوتك...`);await SFX.mystery[s[0]]();
+    const r=await ask(`هل هو: ${opts.map(o=>o[0]).join("، أو ")}؟`,{to:p,options:opts.map(o=>({label:o[0],value:o[0]}))});
+    const ok=r.value?r.value===s[0]:hasAny(r.alts,s[2]);
+    if(ok){addPts(p,1);await say(`${pick(HYPE)} هو صوت ${s[0]}.`)}else await say(`لا، كان صوت ${s[0]}... ${pick(["وسمعتم هذا الصوت قبل ظهور الشبح!","أو هذا ما أرادوكم أن تسمعوه...",""])}`);
+  }}};
+// 15 المذيع المتصل
+G.caller={name:"المذيع المتصل",stage:"peak",ok:()=>true,run:async()=>{
+  await say("المذيع المتصل! أعطي واحداً منكم موقفاً، وأنا زبون صعب. عشرين ثانية لإقناعي!");
+  for(const p of shuffle(S.players).slice(0,2)){
+    const sc=pick(CALLER);await ask(`${call(p)}: ${sc} ابدأ!`,{to:p,timeout:22000,options:[{label:"انتهى",value:"done"}]});
+    await say(pick(CALLER_REACT));let y=0,t=0;
+    for(const q of S.players.filter(x=>x!==p)){const r=await ask(`${call(q)}، اقتنعت؟`,{to:q,options:YN});const v=yesNo(r);if(v!==null){t++;if(v)y++}}
+    if(y*2>t&&t){addPts(p,2);await say(`أقنع الأغلبية! نقطتان لـ ${nm(p)}.`)}else await say("ما اقتنع أحد! حظ أوفر.");
+  }}};
+// 16 المهمة السرية
+G.mission={name:"المهمة السرية",stage:"long",ok:()=>S.secrets,run:async()=>{
+  await say("المهمة السرية! كل واحد عنده كلمة لازم يخلي غيره يقولها، بدون ما يقولها هو. عندكم ثلاث دقائق سوالف حرة... ابدأوا!");
+  await SFX.whistle();setCap("سوالف حرة… كل واحد يحاول ينجح مهمته (3 دقائق)");await wait(180000);await SFX.whistle();
+  await say("انتهى الوقت! كل واحد يقول بصراحة: نجحت مهمتك؟");
+  for(const p of S.players){const r=await ask(`${call(p)}، نجحت؟`,{to:p,options:YN});if(yesNo(r)){addPts(p,2);await say(`${pick(HYPE)} وكانت كلمته: ${S.roles[p.id].word}!`)}else await say(`كانت كلمته: ${S.roles[p.id].word}!`)}}};
+// 17 الجاسوس
+G.spy={name:"القاتل الصامت",stage:"peak",ok:()=>S.secrets&&S.players.length>=4,run:async()=>{
+  const spy=S.players.find(p=>S.roles[p.id].spy);
+  await say("القاتل الصامت! كلكم تعرفون المكان السري، إلا واحد: الجاسوس. أسأل كل واحد سؤالاً عن المكان، جاوبوا بذكاء حتى لا تكشفوه للجاسوس، والجاسوس يحاول يندمج!");
+  for(const p of shuffle(S.players)){await ask(`${call(p)}، ${pick(SPY_Q)}`,{to:p,timeout:10000,options:[{label:"جاوب",value:"done"}]})}
+  await say("وقت الاتهام! من الجاسوس؟");
+  const v=await voteAll(p=>`${call(p)}، من الجاسوس؟`);
+  const caught=v.length&&v[0][0]===spy.id&&!(v[1]&&v[1][1]===v[0][1]);
+  await SFX.drum();await say(`الجاسوس هو... ${nm(spy)}!`);
+  if(caught){S.players.forEach(p=>{if(p!==spy)addPts(p,1)});await say("انكشف الجاسوس! نقطة لكل الباقين.")}else{addPts(spy,3);await say("نجا الجاسوس! ثلاث نقاط له.")}
+  const r=await ask(`${call(spy)}، فرصتك الأخيرة: وين المكان السري؟`,{to:spy,options:shuffle([S.place,...shuffle(SPY_PLACES.filter(x=>x!==S.place)).slice(0,2)]).map(x=>({label:x,value:x}))});
+  const ok=r.value?r.value===S.place:hasAny(r.alts,[S.place]);
+  if(ok){addPts(spy,2);await say(`صح! المكان ${S.place}. نقطتان إضافيتان للجاسوس!`)}else await say(`لا! المكان كان: ${S.place}.`)}};
+// 18 القصة المجنونة
+G.crazy={name:"القصة المجنونة",stage:"peak",ok:()=>!!SR,run:async()=>{
+  await say("القصة المجنونة! كل واحد يضيف جملة، ولازم يدخل فيها الكلمة الإجبارية اللي أعطيه. وفي الأخير أعيد عليكم القصة كاملة!");
+  const lines=[];await say("كان يا ما كان، في سيارة عائلة عادية جداً...");
+  for(let round=0;round<2;round++)for(const p of S.players){
+    const w=pick(FORCED);const r=await ask(`${call(p)}، كمّل القصة، والكلمة الإجبارية: ${w}!`,{to:p,timeout:12000});
+    if(r.text){lines.push(r.text);if(hasAny(r.alts,[w])){addPts(p,1)}}
+  }
+  if(!lines.length){await say("القصة ضاعت في الزحمة! نكملها مرة ثانية.");return}
+  await SFX.drum();await say("والآن... القصة كاملة!");await say("كان يا ما كان، في سيارة عائلة عادية جداً. "+lines.join(". ")+". وعاشوا في ضحك ونبات، وخلّفوا صبيان وبنات!");await SFX.win()}};
+
+/* =================== البرنامج =================== */
+const STAGES={open:[],rise:[],peak:[],calm:[],long:[]};for(const[k,g]of Object.entries(G))STAGES[g.stage].push(k);
+STAGES.rise.push("likely");STAGES.calm.push("adventure");
+const CURVE=["rise","rise","peak","calm","long","rise","peak","calm"];
+function nextGame(stage){
+  const pool=STAGES[stage].filter(k=>G[k].ok());if(!pool.length)return null;
+  S.used[stage]=S.used[stage]||[];let fresh=pool.filter(k=>!S.used[stage].includes(k)&&k!==S.last);if(!fresh.length){S.used[stage]=[];fresh=pool.filter(k=>k!==S.last);if(!fresh.length)fresh=pool}
+  const k=pick(fresh);S.used[stage].push(k);return k}
+async function intro(){
+  setGame("الافتتاح");await SFX.jingle();
+  await say({calm:"مساء الهدوء والسوالف الحلوة!",fun:"يا هلا ويا مرحبا! معكم مذيع سوالف الطريق، والبرنامج بدأ!",thrill:"انتبهوا... البث بدأ، والليلة ما تشبه أي ليلة!"}[S.mood]);
+  await say("ومعنا الليلة: "+S.players.map(call).join("، و")+".");
+  const lw=DB.lastWinner&&S.players.find(p=>p.name===DB.lastWinner);if(lw)await say(`${nm(lw)} فاز آخر مرة، واليوم يدافع عن لقبه!`);
+  if(!DB.trips)await say("قاعدة واحدة: الطريق أولاً للجميع، واللعبة تنتظر. وأي واحد يقدر يقول: لحظة، ونرجع له بعدين.");
+}
+async function closing(){
+  setGame("الختام");const r=[...S.players].sort((a,b)=>(S.scores[b.id]||0)-(S.scores[a.id]||0));
+  const top=S.scores[r[0].id]||0,w=r.filter(p=>(S.scores[p.id]||0)===top);
+  await say("وصلنا لآخر الحلقة! والفائز...");await SFX.drum();await SFX.win();
+  if(top===0)await say("ولا أحد! الكل متعادل، والحلقة القادمة هي الحاسمة.");
+  else if(w.length>1)await say("تعادل بين "+w.map(nm).join(" و ")+" بـ "+top+" نقاط!");
+  else{await say(`${nm(r[0])} بـ ${top} نقاط! مبروك!`);DB.lastWinner=r[0].name}
+  const k=DB.secret||0;await say("وقبل ما نودعكم... وعدتكم بسر. "+SECRET[k%SECRET.length]+" والباقي... في الرحلة القادمة.");
+  DB.secret=k+1;DB.trips=(DB.trips||0)+1;store(DB);await SFX.jingle();setCap("انتهت الحلقة. إلى اللقاء!");
+}
+async function run(){
+  try{
+    await intro();const left=()=>S.dur*60000-(Date.now()-S.start);let step=0,key="likely",forced=null;
+    do{
+      if(S.only)key=S.only;
+      const g=G[key];S.last=key;setGame(g.name);
+      try{await g.run()}catch(e){if(e instanceof Skip){forced=e.stage||null;await say(forced==="calm"?"لعبة أخف، أبشروا!":forced==="peak"?"تبون حماس؟ أبشروا!":"نغيّرها! اللي بعدها...")}else throw e}
+      if(S.only)break;
+      if(left()>90000){setGame("فاصل");renderScores();await say(Math.random()<.35?pick(TEASE):pick(["فاصل قصير وراجعين!","النتيجة الحين: "+S.players.map(p=>nm(p)+" "+(S.scores[p.id]||0)).join("، ")+"."]))}
+      key=nextGame(forced||CURVE[step++%CURVE.length])||nextGame("rise");forced=null;
+    }while(left()>90000);
+    await closing();
+  }catch(e){if(!(e instanceof Stop)){console.error(e);setCap("صار خطأ: "+e.message)}}
+  finally{S.stopped=true;try{wake&&wake.release()}catch(e){}$("#pauseBtn").textContent="رجوع للتجهيز";$("#pauseBtn").onclick=()=>location.reload()}
+}
+
+/* =================== الأدوار السرية =================== */
+function revealRoles(){return new Promise(done=>{
+  const R=$("#reveal");R.style.display="flex";const ps=S.players;let i=0;
+  S.place=pick(SPY_PLACES);const spyId=ps.length>=4?pick(ps).id:null;const words=shuffle(MISSION_WORDS);
+  S.roles={};ps.forEach((p,k)=>S.roles[p.id]={word:words[k%words.length],spy:p.id===spyId});
+  const step=()=>{if(i>=ps.length){R.style.display="none";done();return}const p=ps[i];
+    R.innerHTML=`<div class="note">مرّر الجوال إلى</div><div class="big">${esc(p.name)}</div><button class="btn-gold" id="rv">أنا ${esc(p.name)}، أرني دوري</button>`;
+    $("#rv").onclick=()=>{const r=S.roles[p.id];
+      R.innerHTML=`<div class="note">مهمتك السرية: اجعل غيرك يقول كلمة</div><div class="big">«${esc(r.word)}»</div>${spyId?`<div class="note">${r.spy?"وفي لعبة القاتل الصامت:":"والمكان السري في لعبة القاتل الصامت:"}</div><div class="big">${r.spy?"أنت الجاسوس! 🤫":esc(S.place)}</div>`:""}<button id="rv2">فهمت، أخفِ</button>`;
+      $("#rv2").onclick=()=>{i++;step()}}};
+  step();
+})}
+
+/* =================== الأزرار =================== */
+let wake=null;
+function alertBox(t){const s=$("#support");s.className="card warn";s.textContent=t;s.scrollIntoView({behavior:"smooth"})}
+$("#go").onclick=async()=>{
+  const list=players.filter(p=>p.name.trim()).map(p=>{const o={};for(const k in p)o[k]=typeof p[k]==="string"?p[k].trim():p[k];return o});
+  if(list.length<2)return alertBox("أضف متسابقَين على الأقل بأسمائهم.");
+  ac();Object.assign(S,{players:list,scores:{},used:{},confUsed:[],chargeUsed:[],quoteUsed:[],storyUsed:[],dur:+$("#dur").value,mood:$("#mood").value,rate:+$("#rate").value,vol:+$("#vol").value,secrets:$("#secrets").checked});
+  S.only=(location.hash.match(/^#test-(\w+)/)||[])[1]||null;
+  DB.settings={dur:$("#dur").value,mood:S.mood,rate:$("#rate").value,vol:$("#vol").value};
+  if($("#saveCrew").checked)DB.crew=list.map(p=>({id:p.id,name:p.name,nick:p.nick,say:p.say,age:p.age}));store(DB);
+  if(S.secrets)await revealRoles();
+  try{wake=await navigator.wakeLock.request("screen")}catch(e){}
+  S.start=Date.now();$("#setup").style.display="none";$("#live").style.display="flex";renderScores();run();
+};
+$("#pauseBtn").onclick=()=>S.paused?resume():pause();
+const inject=t=>{if(manualRes){const r=manualRes;manualRes=null;try{curRec&&curRec.abort()}catch(e){}r({text:t,alts:[t]})}};
+$("#momentBtn").onclick=()=>inject("لحظه");
+$("#repeatBtn").onclick=()=>inject("كرر");
+$("#skipBtn").onclick=()=>inject("غير اللعبه");
+$("#endBtn").onclick=()=>{S.stopped=true;abortIO();const w=S.resumeW;S.resumeW=[];w.forEach(f=>f());setCap("تم إنهاء البرنامج.")};
+$("#testBtn").onclick=async()=>{
+  ac();S.vol=+$("#vol").value;S.rate=+$("#rate").value;$("#testBtn").disabled=true;
+  await speakOne("أهلاً، أنا مذيع سوالف الطريق. قل أي كلمة بعد الصفارة.");await SFX.beep();
+  const box=$("#support");box.className="card note";box.textContent="🎙️ أسمعك…";
+  const r=SR?await listen(6000):{text:""};
+  box.textContent=r.text?"سمعت: "+r.text:"ما سمعت شيئاً. تأكد من إذن الميكروفون.";
+  await speakOne(r.text?"سمعتك تقول: "+r.text:"ما سمعت شيئاً.");$("#testBtn").disabled=false;
+};
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
