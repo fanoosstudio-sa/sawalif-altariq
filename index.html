@@ -220,9 +220,9 @@ const HAS_TTS="speechSynthesis" in window;
 let arVoice=null;
 function pickVoice(){const v=speechSynthesis.getVoices().filter(v=>/^ar/i.test(v.lang));arVoice=v.find(v=>/SA/i.test(v.lang))||v[0]||null;showSupport()}
 function showSupport(){
-  const ok1=HAS_TTS&&!!arVoice,ok2=!!SR;
+  const ok1=HAS_TTS,ok2=!!SR;
   $("#support").className="card note"+(ok1&&ok2?"":" warn");
-  $("#support").innerHTML=`${ok1?'<span class="ok">✓</span> صوت عربي متوفر':'✗ لا يوجد صوت عربي هنا. ثبّت «Google Text-to-Speech» وأضف العربية، واستخدم Chrome.'}<br>${ok2?'<span class="ok">✓</span> الميكروفون مدعوم':'✗ التعرف على الكلام غير مدعوم هنا (استخدم Chrome). يمكن اللعب بالأزرار.'}`;
+  $("#support").innerHTML=`${ok1?'<span class="ok">✓</span> الصوت متوفر (جرّب «اختبار الصوت» للتأكد)':'✗ لا يوجد صوت عربي هنا. ثبّت «Google Text-to-Speech» وأضف العربية، واستخدم Chrome.'}<br>${ok2?'<span class="ok">✓</span> الميكروفون مدعوم':'✗ التعرف على الكلام غير مدعوم هنا (استخدم Chrome). يمكن اللعب بالأزرار.'}`;
 }
 if(HAS_TTS){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}else showSupport();
 
@@ -267,8 +267,8 @@ const nameOpts=pool=>pool.map(p=>({label:p.name,value:p.id}));
 const YN=[{label:"نعم",value:"yes"},{label:"لا",value:"no"}];
 
 function speakOne(text,rate){return new Promise(res=>{
-  if(!HAS_TTS||!arVoice){setTimeout(res,Math.min(5000,600+text.length*55));return}
-  const u=new SpeechSynthesisUtterance(text);u.lang="ar-SA";u.voice=arVoice;u.rate=rate||S.rate;u.volume=S.vol;
+  if(!HAS_TTS){setTimeout(res,Math.min(5000,600+text.length*55));return}
+  const u=new SpeechSynthesisUtterance(text);u.lang="ar-SA";if(arVoice)u.voice=arVoice;u.rate=rate||S.rate;u.volume=S.vol;
   let done=false;const fin=()=>{if(!done){done=true;clearTimeout(t);res()}};
   u.onend=fin;u.onerror=fin;const t=setTimeout(fin,text.length*140+4000);
   speechSynthesis.speak(u);
